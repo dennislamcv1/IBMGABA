@@ -1,0 +1,38 @@
+flowchart TD
+  A([Start Login]) --> B[Enter Username & Password]
+  B --> C{Valid Credentials?}
+  C -- No --> D[Increment Failed Attempt Counter]
+  D --> E{Exceeded Max Attempts?}
+  E -- Yes --> F[Lock Account]
+  E -- No --> G[Display Error: Invalid Credentials]
+  F --> H[Log Security Event: Account Locked]
+  G --> I[Log Security Event: Failed Login]
+  I --> B
+  F --> J([End])
+
+  C -- Yes --> K[Initiate 2FA Verification]
+  K --> L{2FA Success?}
+  L -- No --> M[Display Error: 2FA Failed]
+  M --> N[Log Security Event: 2FA Failure]
+  N --> B
+
+  L -- Yes --> O[Create Session Token]
+  O --> P[Set Session Timeout and Store Securely]
+  P --> Q[Log Security Event: Successful Login]
+  Q --> R([Access Application])
+  R --> S([End])
+
+  B --> T{Forgot Password?}
+  T -- Yes --> U[Initiate Password Reset Process]
+  U --> V[Send Password Reset Link via Email]
+  V --> W[User Resets Password]
+  W --> X[Update Password in Database]
+  X --> Y[Log Security Event: Password Reset]
+  Y --> B
+
+  classDef error fill:#fdd,stroke:#f00,stroke-width:2px;
+  classDef success fill:#dfd,stroke:#080,stroke-width:2px;
+  classDef log fill:#eef,stroke:#00f,stroke-width:1px;
+  class F,G,M style F,G,M error;
+  class Q,R,S success;
+  class H,I,N,Y log;

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             id="Definitions_CustomerOnboarding"
+             targetNamespace="http://example.com/bpmn">
+
+  <!-- PROCESS DEFINITION -->
+  <process id="CustomerOnboardingProcess" name="Customer Onboarding" isExecutable="true">
+
+    <!-- SWIMLANES -->
+    <laneSet id="LaneSet_CustomerOnboarding">
+      <lane id="Lane_Customer" name="Customer">
+        <flowNodeRef>StartEvent_RequestSubmitted</flowNodeRef>
+        <flowNodeRef>Task_ReviewProposal</flowNodeRef>
+      </lane>
+      <lane id="Lane_Sales" name="Sales">
+        <flowNodeRef>Task_ReviewRequest</flowNodeRef>
+        <flowNodeRef>Gateway_Qualified</flowNodeRef>
+        <flowNodeRef>Task_PrepareProposal</flowNodeRef>
+        <flowNodeRef>Task_SendInfoPackage</flowNodeRef>
+      </lane>
+      <lane id="Lane_Operations" name="Operations">
+        <flowNodeRef>Gateway_ProposalAccepted</flowNodeRef>
+        <flowNodeRef>Task_CreateAccount</flowNodeRef>
+        <flowNodeRef>Task_AccountConfig</flowNodeRef>
+        <flowNodeRef>Task_TrainingSchedule</flowNodeRef>
+        <flowNodeRef>Task_GoLiveSupport</flowNodeRef>
+        <flowNodeRef>Task_SendSurvey</flowNodeRef>
+      </lane>
+    </laneSet>
+
+    <!-- FLOW NODES -->
+    <startEvent id="StartEvent_RequestSubmitted" name="Customer submits request"/>
+    <sequenceFlow id="Flow_1" sourceRef="StartEvent_RequestSubmitted" targetRef="Task_ReviewRequest"/>
+    
+    <userTask id="Task_ReviewRequest" name="Review & Qualify Request"/>
+    <sequenceFlow id="Flow_2" sourceRef="Task_ReviewRequest" targetRef="Gateway_Qualified"/>
+    
+    <exclusiveGateway id="Gateway_Qualified" name="Qualified?" default="Flow_NotQualified"/>
+    <sequenceFlow id="Flow_Qualified" sourceRef="Gateway_Qualified" targetRef="Task_PrepareProposal">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${qualified == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_NotQualified" sourceRef="Gateway_Qualified" targetRef="Task_SendInfoPackage"/>
+    
+    <userTask id="Task_PrepareProposal" name="Prepare & Send Proposal"/>
+    <sequenceFlow id="Flow_3" sourceRef="Task_PrepareProposal" targetRef="Task_ReviewProposal"/>
+
+    <userTask id="Task_SendInfoPackage" name="Send Info Package"/>
+    <endEvent id="EndEvent_NotQualified" name="End (Not Qualified)"/>
+    <sequenceFlow id="Flow_4" sourceRef="Task_SendInfoPackage" targetRef="EndEvent_NotQualified"/>
+
+    <userTask id="Task_ReviewProposal" name="Customer Reviews Proposal"/>
+    <sequenceFlow id="Flow_5" sourceRef="Task_ReviewProposal" targetRef="Gateway_ProposalAccepted"/>
+    
+    <exclusiveGateway id="Gateway_ProposalAccepted" name="Proposal Accepted?" default="Flow_Rejected"/>
+    <sequenceFlow id="Flow_Accepted" sourceRef="Gateway_ProposalAccepted" targetRef="Task_CreateAccount">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${accepted == true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="Flow_Rejected" sourceRef="Gateway_ProposalAccepted" targetRef="EndEvent_Rejected"/>
+
+    <endEvent id="EndEvent_Rejected" name="End (Proposal Rejected)"/>
+    
+    <serviceTask id="Task_CreateAccount" name="Create Customer Account" implementation="##WebService"/>
+    <sequenceFlow id="Flow_6" sourceRef="Task_CreateAccount" targetRef="Task_AccountConfig"/>
+    
+    <serviceTask id="Task_AccountConfig" name="Account Configuration" implementation="##WebService"/>
+    <sequenceFlow id="Flow_7" sourceRef="Task_AccountConfig" targetRef="Task_TrainingSchedule"/>
+    
+    <serviceTask id="Task_TrainingSchedule" name="Schedule Training" implementation="##WebService"/>
+    <sequenceFlow id="Flow_8" sourceRef="Task_TrainingSchedule" targetRef="Task_GoLiveSupport"/>
+
+    <serviceTask id="Task_GoLiveSupport" name="Go‑Live Support" implementation="##WebService"/>
+    <sequenceFlow id="Flow_9" sourceRef="Task_GoLiveSupport" targetRef="Task_SendSurvey"/>
+    
+    <userTask id="Task_SendSurvey" name="Send Satisfaction Survey"/>
+    <sequenceFlow id="Flow_10" sourceRef="Task_SendSurvey" targetRef="EndEvent_Finished"/>
+    
+    <endEvent id="EndEvent_Finished" name="Process Completed"/>
+
+  </process>
+
+  <!-- BPMN DIAGRAM (VISUAL LAYOUT) -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_CustomerOnboarding">
+    <bpmndi:BPMNPlane id="BPMNPlane_CustomerOnboarding" bpmnElement="CustomerOnboardingProcess">
+      
+      <!-- Swimlanes -->
+      <bpmndi:BPMNShape id="LaneShape_Customer" bpmnElement="Lane_Customer">
+        <dc:Bounds x="0" y="0" width="600" height="160"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="LaneShape_Sales" bpmnElement="Lane_Sales">
+        <dc:Bounds x="0" y="160" width="600" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="LaneShape_Operations" bpmnElement="Lane_Operations">
+        <dc:Bounds x="0" y="380" width="600" height="260"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Nodes -->
+      <bpmndi:BPMNShape id="Shape_Start" bpmnElement="StartEvent_RequestSubmitted">
+        <dc:Bounds x="40" y="20" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_ReviewRequest" bpmnElement="Task_ReviewRequest">
+        <dc:Bounds x="120" y="200" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Qualified" bpmnElement="Gateway_Qualified" isMarkerVisible="true">
+        <dc:Bounds x="260" y="210" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_PrepareProposal" bpmnElement="Task_PrepareProposal">
+        <dc:Bounds x="340" y="180" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendInfoPackage" bpmnElement="Task_SendInfoPackage">
+        <dc:Bounds x="340" y="280" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_NotQualified" bpmnElement="EndEvent_NotQualified">
+        <dc:Bounds x="480" y="300" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_ReviewProposal" bpmnElement="Task_ReviewProposal">
+        <dc:Bounds x="460" y="20" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_ProposalAccepted" bpmnElement="Gateway_ProposalAccepted" isMarkerVisible="true">
+        <dc:Bounds x="600" y="30" width="50" height="50"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Rejected" bpmnElement="EndEvent_Rejected">
+        <dc:Bounds x="740" y="30" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_CreateAccount" bpmnElement="Task_CreateAccount">
+        <dc:Bounds x="780" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_AccountConfig" bpmnElement="Task_AccountConfig">
+        <dc:Bounds x="900" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_TrainingSchedule" bpmnElement="Task_TrainingSchedule">
+        <dc:Bounds x="1020" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_GoLiveSupport" bpmnElement="Task_GoLiveSupport">
+        <dc:Bounds x="1140" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_SendSurvey" bpmnElement="Task_SendSurvey">
+        <dc:Bounds x="1260" y="400" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_End_Finished" bpmnElement="EndEvent_Finished">
+        <dc:Bounds x="1400" y="420" width="36" height="36"/>
+      </bpmndi:BPMNShape>
+
+      <!-- Sequence Flows -->
+      <!-- Flows from customer to sales qualification -->
+      <bpmndi:BPMNEdge id="Edge_Flow_1" bpmnElement="Flow_1">
+        <di:waypoint x="76" y="38"/>
+        <di:waypoint x="120" y="200"/>
+      </bpmndi:BPMNEdge>
+      <!-- Additional edges omitted for brevity but follow same pattern for Flow_2 – Flow_10 -->
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>
